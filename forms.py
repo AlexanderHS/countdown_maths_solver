@@ -9,5 +9,5 @@ class PuzzleInputForm(FlaskForm):
     number4 = IntegerField('Number 4', default=2)
     number5 = IntegerField('Number 5', default=9)
     number6 = IntegerField('Number 6', default=4)
-    min_runtime = IntegerField('Stop running if find solution in this many seconds', default=30)
+    min_runtime = IntegerField('Stop running if find solution in this many seconds', default=5)
     submit = SubmitField('Solve')
