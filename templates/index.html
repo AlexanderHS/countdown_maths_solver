@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- jQuery and DataTables -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        $('#example').DataTable({
+            "order": [[6, "asc"]],
+            "paging": false,
+            "info": true,
+            "searching": true
+        });
+    });
+    </script>
+    <style>
+        body {
+            background-color: #1a202c;
+            color: #cbd5e0;
+        }
+        a {
+            color: #63b3ed;
+        }
+        table.dataTable thead {
+            background-color: #2d3748;
+        }
+        table.dataTable tbody {
+            background-color: #1a202c;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased">
+    <div class="container mx-auto p-4">
+        <a href="/">
+            <h1 class="text-4xl font-bold mb-4">{{ title }}</h1>
+        </a>
+
+        <form method="POST" action="{{ url_for('base_url') }}" class="mb-8">
+            {{ form.hidden_tag() }}
+            {% for form_element in form_elements %}
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-300">{{ form_element.label }}</label>
+                {{ form_element(size=32, class_="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md text-gray-200 focus:ring-indigo-500 focus:border-indigo-500") }}
+                {% if form_element.errors %}
+                <ul class="mt-2 text-sm text-red-600">
+                    {% for error in form_element.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Submit</button>
+            <h2 class="text-2xl font-semibold mt-6">{{ result }}</h2>
+        </form>
+
+        {% if solutions %}
+        <table id="example" class="display w-full text-gray-200">
+            <thead class="bg-gray-700">
+                <tr>
+                    <th>Used Numbers</th>
+                    <th>Unused Numbers</th>
+                    <th>Formula String</th>
+                    <th>Target</th>
+                    <th>Total</th>
+                    <th>Error</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for solution in solutions %}
+                <tr class="bg-gray-800">
+                    <td>{{ solution.used_numbers }}</td>
+                    <td>{{ solution.unused_numbers }}</td>
+                    <td>{{ solution.formula_str() }}</td>
+                    <td>{{ solution.target }}</td>
+                    <td>{{ solution.total_str() }}</td>
+                    <td>{{ solution.error }}</td>
+                    <td>{{ solution._score }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot class="bg-gray-700">
+                <tr>
+                    <th>Used Numbers</th>
+                    <th>Unused Numbers</th>
+                    <th>Formula String</th>
+                    <th>Target</th>
+                    <th>Total</th>
+                    <th>Error</th>
+                    <th>Score</th>
+                </tr>
+            </tfoot>
+        </table>
+        {% endif %}
+    </div>
+</body>
+</html>
