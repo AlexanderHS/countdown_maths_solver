@@ -1,3 +1,4 @@
+import datetime
 import logging
 import os
 from typing import List, Tuple
@@ -25,8 +26,23 @@ def base_url():
         valid = validalidation_result[0]
         form = validalidation_result[1]
         if valid:
-            solutions: List[SolveState] = get_solutions(form, stop_after_seconds=form.min_runtime.data)
-            result=f'Found {solutions[0].formula_str()} in {form.min_runtime.data} seconds!'
+            start_time = datetime.datetime.now()
+            numbers = [
+                form.number1.data,
+                form.number2.data,
+                form.number3.data,
+                form.number4.data,
+                form.number5.data,
+                form.number6.data,
+            ]
+            target = form.target.data
+            solutions: List[SolveState] = get_solutions(
+                numbers=numbers,
+                target=target,
+                stop_after_seconds=form.min_runtime.data)
+            end_time = datetime.datetime.now()
+            time_elapsed = end_time - start_time
+            result=f'Found {solutions[0].formula_str()} in {time_elapsed.total_seconds()} seconds!'
         else:
             result='The input form is invalid!'
     else:
@@ -44,7 +60,7 @@ def base_url():
     template_data = {
         'form': form,
         'form_elements': form_elements,
-        'title': 'Home',
+        'title': 'Countdown Numbers Game Solver',
         'result': result,
         'solutions': solutions
     }

@@ -20,16 +20,16 @@ def validate_input(form: PuzzleInputForm) -> Tuple[bool, PuzzleInputForm]:
             valid = False
             number.errors.append('Number must be less than 100')
 
-    if form.target.data < 100:
+    if form.target.data < 1:
         valid = False
-        form.target.errors.append('Target must be greater than 100')
+        form.target.errors.append('Target must be greater than 0')
     if form.target.data > 999:
         valid = False
         form.target.errors.append('Target must be less than 999')
     if form.min_runtime.data < 1:
         valid = False
         form.min_runtime.errors.append('Max runtime must be greater than 0')
-    if form.min_runtime.data > 300:
+    if form.min_runtime.data > 30:
         valid = False
-        form.min_runtime.errors.append('Max runtime must be less than 300')
+        form.min_runtime.errors.append('Runtime must be less than 30 seconds. Thems the rules!')
     return (valid, form)

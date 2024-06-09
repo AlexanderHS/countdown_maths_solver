@@ -12,17 +12,8 @@ from models import Operation, SolveState
 
 logging.basicConfig(level=logging.DEBUG)
 
-def get_solutions(form: PuzzleInputForm, stop_after_seconds: int = 30) -> List[SolveState]:
-    numbers = [
-        form.number1.data,
-        form.number2.data,
-        form.number3.data,
-        form.number4.data,
-        form.number5.data,
-        form.number6.data
-    ]
-    #numbers = [1,3,7,9,90]
-    target = form.target.data
+@time_limited_cache(CACHE_TIMEOUT)
+def get_solutions(numbers: List[int], target: int, stop_after_seconds: int = 30) -> List[SolveState]:
     nodes: List[SolveState] = [starting_nodes(numbers, target)]
     nodes_for_expansion: List[SolveState] = nodes.copy()
     seen_formulas = set()
@@ -90,7 +81,7 @@ def expand_node(node: SolveState) -> List[SolveState]:
                     if right.total == 0 or left.total % right.total != 0:
                         continue
                     result = left.total // right.total
-                elif operator == '*':
+                elif operator in ['*', '/']:
                     if left.total == 1 or right.total == 1:
                         continue
                     result = left.total * right.total

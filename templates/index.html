@@ -33,6 +33,18 @@
         table.dataTable tbody {
             background-color: #1a202c;
         }
+        .input-error {
+            border-color: #e53e3e;
+        }
+        input {
+            max-width: 100px;
+            min-width: 100px;
+            text-align: center;
+            min-height: 50px;
+        }
+        button {
+            min-width: 100px;
+        }
     </style>
 </head>
 <body class="font-sans antialiased">
@@ -43,19 +55,21 @@
 
         <form method="POST" action="{{ url_for('base_url') }}" class="mb-8">
             {{ form.hidden_tag() }}
-            {% for form_element in form_elements %}
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-300">{{ form_element.label }}</label>
-                {{ form_element(size=32, class_="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md text-gray-200 focus:ring-indigo-500 focus:border-indigo-500") }}
-                {% if form_element.errors %}
-                <ul class="mt-2 text-sm text-red-600">
-                    {% for error in form_element.errors %}
-                    <li>{{ error }}</li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
+            <div class="flex flex-wrap -mx-2">
+                {% for form_element in form_elements %}
+                <div class="w-full md:w-1/6 px-2 mb-4">
+                    <label class="block text-sm font-medium text-gray-300">{{ form_element.label }}</label>
+                    {{ form_element(size=32, class_="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md text-gray-200 focus:ring-indigo-500 focus:border-indigo-500") }}
+                    {% if form_element.errors %}
+                    <ul class="mt-2 text-sm text-red-600">
+                        {% for error in form_element.errors %}
+                        <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
             <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Submit</button>
             <h2 class="text-2xl font-semibold mt-6">{{ result }}</h2>
         </form>
@@ -76,7 +90,7 @@
             <tbody>
                 {% for solution in solutions %}
                 <tr class="bg-gray-800">
-                    <td>{{ solution.used_numbers }}</td>
+                    <td>{{ solution.used_numbers}}</td>
                     <td>{{ solution.unused_numbers }}</td>
                     <td>{{ solution.formula_str() }}</td>
                     <td>{{ solution.target }}</td>

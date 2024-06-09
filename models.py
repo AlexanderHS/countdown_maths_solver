@@ -28,8 +28,20 @@ class Operation():
         if self.left is None and self.right is None:
             return str(self.total)
         left_str = self.left.formula_str() if self.left is not None else ''
+        if self.left.operator == None:
+            left_str = f'{left_str}'
+        elif self.left.operator in ['*', '/'] or self.operator in ['*', '/']:
+            left_str = f'({left_str})'
+        else:
+            left_str = f'{left_str}'
         right_str = self.right.formula_str() if self.right is not None else ''
-        return f'({left_str} {self.operator} {right_str})'
+        if self.right.operator == None:
+            right_str = f'{right_str}'
+        elif self.right.operator in ['*', '/']  or self.operator in ['*', '/']:
+            right_str = f'({right_str})'
+        else:
+            right_str = f'{right_str}'
+        return f'{left_str}{self.operator}{right_str}'
     
     def used_numbers(self) -> List[int]:
         if self.left is None and self.right is None:
