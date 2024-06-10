@@ -56,10 +56,10 @@ def get_solutions(numbers: List[int], target: int, stop_after_seconds: int = 30)
     nodes = sorted(nodes, key=lambda x: (x.error, x._score), reverse=False)
     logging.debug(f'Found {len(nodes)} solutions')
 
-    nodes = nodes[:1_000]
     time_elapsed = datetime.datetime.now() - start
     time_elapsed_seconds = time_elapsed.total_seconds()
     logging.info(f'Found {len(nodes)} solutions in seconds: {time_elapsed_seconds}')
+    nodes = nodes[:1_000]
     return nodes
 
 
