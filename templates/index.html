@@ -30,10 +30,33 @@
         }
         table.dataTable thead {
             background-color: #2d3748;
+            color: #cbd5e0;
         }
         table.dataTable tbody {
             background-color: #1a202c;
             text-align: center;
+            color: #cbd5e0;
+        }
+        table.dataTable tbody tr {
+            background-color: #1a202c;
+        }
+        table.dataTable tbody td:nth-child(odd) {
+            background-color: #2d3748;
+        }
+        table.dataTable tbody td:nth-child(even) {
+            background-color: #1a202c;
+        }
+        table.dataTable tbody tr.selected {
+            background-color: #4a5568 !important;
+        }
+        table.dataTable tbody td.sorting_1,
+        table.dataTable tbody td.sorting_2,
+        table.dataTable tbody td.sorting_3 {
+            background-color: #1e2e46 !important;
+        }
+        table.dataTable tfoot {
+            background-color: #2d3748;
+            color: #cbd5e0;
         }
         .input-error {
             border-color: #e53e3e;
@@ -46,6 +69,7 @@
         }
         button {
             min-width: 100px;
+            min-height: 50px;
         }
     </style>
 </head>
@@ -100,7 +124,7 @@
             </thead>
             <tbody>
                 {% for solution in solutions %}
-                <tr class="bg-gray-800">
+                <tr>
                     <td>{{ solution.used_numbers}}</td>
                     <td>{{ solution.unused_numbers }}</td>
                     <td>{{ solution.formula_str() }}</td>
