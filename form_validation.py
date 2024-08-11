@@ -1,6 +1,8 @@
 from typing import Tuple
 from forms import PuzzleInputForm
 
+MAX_TIME = 90
+
 def validate_input(form: PuzzleInputForm) -> Tuple[bool, PuzzleInputForm]:
     # Check if the sum of the numbers is equal to the target
     valid = True
@@ -29,7 +31,7 @@ def validate_input(form: PuzzleInputForm) -> Tuple[bool, PuzzleInputForm]:
     if form.min_runtime.data < 1:
         valid = False
         form.min_runtime.errors.append('Max runtime must be greater than 0')
-    if form.min_runtime.data > 30:
+    if form.min_runtime.data > MAX_TIME:
         valid = False
-        form.min_runtime.errors.append('Runtime must be less than 30 seconds. Thems the rules!')
+        form.min_runtime.errors.append(f'Runtime must be less than {MAX_TIME} seconds. Thems the rules!')
     return (valid, form)
