@@ -14,53 +14,82 @@ logging.basicConfig(level=logging.DEBUG)
 
 @time_limited_cache(CACHE_TIMEOUT)
 def get_solutions(numbers: List[int], target: int, stop_after_seconds: int = 30) -> List[SolveState]:
-    nodes: List[SolveState] = [starting_nodes(numbers, target)]
-    nodes_for_expansion: List[SolveState] = nodes.copy()
+    import heapq
+    
+    all_nodes: List[SolveState] = []
+    # Use priority queue for best-first search (lowest error first)
+    start_node = starting_nodes(numbers, target)
+    nodes_for_expansion = [(start_node.error, 0, start_node)]
+    heapq.heapify(nodes_for_expansion)
     seen_formulas = set()
-    expanded: int = 0;
+    expanded: int = 0
     start: datetime.datetime = datetime.datetime.now()
-    solution_found = False
+    best_error = float('inf')
+    exact_solutions_found = []
+    
     while nodes_for_expansion:
-        current_node: SolveState = nodes_for_expansion.pop(0)
+        # Check time limit
+        time_elapsed = datetime.datetime.now() - start
+        if time_elapsed.total_seconds() > stop_after_seconds:
+            logging.info(f'Stopping due to time limit: {time_elapsed.total_seconds()} seconds')
+            break
+            
+        _, _, current_node = heapq.heappop(nodes_for_expansion)
         expanded += 1
+        
+        # If we found an exact solution, collect it but keep searching for more
+        if current_node.error == 0:
+            exact_solutions_found.append(current_node)
+            all_nodes.append(current_node)
+            best_error = 0
+            logging.info(f'Found exact solution: {current_node.solution.formula_str()} in {time_elapsed.total_seconds()} seconds')
+            
+            # If we have multiple exact solutions and have been searching a while, we can stop
+            if len(exact_solutions_found) >= 3 and time_elapsed.total_seconds() > 1.0:
+                logging.info(f'Found {len(exact_solutions_found)} exact solutions, stopping search')
+                break
+            continue
+            
+        # If we have exact solutions and current error is much worse, skip this branch
+        if best_error == 0 and current_node.error > 100:
+            continue
+            
+        # Minimal pruning - only skip if error is enormous to prevent infinite search
+        # This ensures we find complex exact solutions that may require poor intermediate steps  
+        if current_node.error > 1000 and len(all_nodes) > 10000:
+            continue
+            
         new_nodes: List[SolveState] = expand_node(current_node)
-        new_nodes_without_repeat: List[SolveState] = []
         for node in new_nodes:
             formula_str = node._unique_string
-            error = node.error
             if formula_str not in seen_formulas:
                 seen_formulas.add(formula_str)
-                new_nodes_without_repeat.append(node)
-                #logging.debug(f'Adding {formula_str} to seen formulas')
-            if error == 0:
-                solution_found = True
-                time_elapsed = datetime.datetime.now() - start
-                time_elapsed_seconds = time_elapsed.total_seconds()
-                logging.info(f'Found solution: {node.solution.formula_str()} in seconds: {time_elapsed_seconds}')
-        if solution_found:
+                all_nodes.append(node)
+                best_error = min(best_error, node.error)
+                
+                # Continue expanding all promising nodes
+                heapq.heappush(nodes_for_expansion, (node.error, len(all_nodes), node))
+
+        if expanded % 2000 == 0:
             time_elapsed = datetime.datetime.now() - start
             time_elapsed_seconds = time_elapsed.total_seconds()
-            if time_elapsed_seconds > stop_after_seconds:
-                nodes_for_expansion = []    # stop expanding nodes
-                print(f'Stopping after {time_elapsed_seconds} seconds')
+            expanded_per_second = int(expanded / time_elapsed_seconds) if time_elapsed_seconds > 0 else 0
+            logging.debug(f'{int(time_elapsed_seconds)}sec:Expanded {expanded}. {expanded_per_second=}. Found {len(all_nodes)} solutions (best error: {best_error})... {len(nodes_for_expansion)} nodes left to expand')
 
-        nodes_for_expansion.extend(new_nodes_without_repeat)
-        nodes.extend(new_nodes_without_repeat)
-        if expanded % 5000 == 0:
-            time_elapsed = datetime.datetime.now() - start
-            time_elapsed_seconds = time_elapsed.total_seconds()
-            expanded_per_second = int(expanded / time_elapsed_seconds)
-            logging.debug(f'{int(time_elapsed_seconds)}sec:Expanded {expanded}. {expanded_per_second=}. Found {len(nodes)} solutions... {len(nodes_for_expansion)} nodes left to expand')
-
-    # sort the nodes by error then length of formula
-    nodes = sorted(nodes, key=lambda x: (x.error, x._score), reverse=False)
-    logging.debug(f'Found {len(nodes)} solutions')
-
+    # Sort all nodes by error then complexity
+    all_nodes = sorted(all_nodes, key=lambda x: (x.error, x._score), reverse=False)
+    
     time_elapsed = datetime.datetime.now() - start
     time_elapsed_seconds = time_elapsed.total_seconds()
-    logging.info(f'Found {len(nodes)} solutions in seconds: {time_elapsed_seconds}')
-    nodes = nodes[:1_000]
-    return nodes
+    logging.info(f'Found {len(all_nodes)} solutions in seconds: {time_elapsed_seconds}')
+    
+    # Return best solutions, prioritizing exact matches
+    # If we found exact solutions, prioritize them
+    if exact_solutions_found:
+        exact_solutions_found.extend([sol for sol in all_nodes if sol.error > 0])
+        return exact_solutions_found[:1000]
+    else:
+        return all_nodes[:1000]
 
 
 #@time_limited_cache(CACHE_TIMEOUT)
